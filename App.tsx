@@ -1,117 +1,104 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  Pressable,
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const tabs = ['Home', 'Stock', 'Orders'] as const;
+type Tab = (typeof tabs)[number];
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const [activeTab, setActiveTab] = useState<Tab>('Home');
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#17324d" />
+      <View style={styles.navbar}>
+        <Text style={styles.brand}>Warehouse</Text>
+        <View style={styles.tabs}>
+          {tabs.map(tab => (
+            <Pressable
+              key={tab}
+              accessibilityRole="button"
+              accessibilityState={{selected: activeTab === tab}}
+              onPress={() => setActiveTab(tab)}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}>
+                {tab}
+              </Text>
+            </Pressable>
+          ))}
         </View>
-      </ScrollView>
+      </View>
+      <View style={styles.content}>
+        <Text style={styles.heading}>{activeTab}</Text>
+        <Text style={styles.description}>
+          Welcome to your warehouse.
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f6f8',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  navbar: {
+    minHeight: 64,
+    paddingHorizontal: 16,
+    backgroundColor: '#17324d',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  sectionDescription: {
-    marginTop: 8,
+  brand: {
+    color: '#ffffff',
     fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
     fontWeight: '700',
+  },
+  tabs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 9,
+    marginLeft: 4,
+    borderRadius: 6,
+  },
+  activeTab: {
+    backgroundColor: '#ffffff',
+  },
+  tabText: {
+    color: '#d7e2ec',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: '#17324d',
+  },
+  content: {
+    padding: 24,
+  },
+  heading: {
+    color: '#17324d',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  description: {
+    marginTop: 8,
+    color: '#5d6b78',
+    fontSize: 16,
   },
 });
 
