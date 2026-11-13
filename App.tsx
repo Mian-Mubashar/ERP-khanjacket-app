@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { HeaderNavbar } from './src/components/HeaderNavbar';
 import { SidebarDrawer, ScreenName } from './src/components/SidebarDrawer';
 import { BottomTabBar } from './src/components/BottomTabBar';
+import { PushNotificationService } from './src/services/PushNotificationService';
 
 // All 13 Portal Screens matching web sidebar
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -30,6 +31,29 @@ function MainApp(): React.JSX.Element {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('Dashboard');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [refreshKey] = useState(0);
+
+  // Initialize push notification listener & sync token to backend on app launch
+  useEffect(() => {
+    PushNotificationService.initialize((data) => {
+      if (data?.type) {
+        switch (data.type) {
+          case 'WASOOLI':
+          case 'CUSTOMER_DUE':
+            setCurrentScreen('Ugrahi');
+            break;
+          case 'STOCK_ALERT':
+            setCurrentScreen('Articles');
+            break;
+          case 'OUTWARD':
+          case 'BILL':
+            setCurrentScreen('Outward');
+            break;
+          default:
+            setCurrentScreen('Announcements');
+        }
+      }
+    });
+  }, []);
 
   const getScreenTitle = (screen: ScreenName): string => {
     switch (screen) {
