@@ -58,9 +58,9 @@ export const OutwardScreen: React.FC = () => {
       return true;
     }
     return (
-      d.challanNo.toLowerCase().includes(q) ||
-      d.customerName.toLowerCase().includes(q) ||
-      d.city.toLowerCase().includes(q)
+      (d.challanNo && d.challanNo.toLowerCase().includes(q)) ||
+      (d.customerName && d.customerName.toLowerCase().includes(q)) ||
+      (d.city && d.city.toLowerCase().includes(q))
     );
   });
 
@@ -138,10 +138,10 @@ export const OutwardScreen: React.FC = () => {
         <View style={styles.metricsRow}>
           <View>
             <Text style={[styles.summaryTitle, { color: theme.textPrimary }]}>
-              {filteredDispatches.length} Challans • {totalRawangiPcs.toLocaleString()} Pcs Dispatched
+              {filteredDispatches.length} Challans • {Number(totalRawangiPcs || 0).toLocaleString()} Pcs Dispatched
             </Text>
             <Text style={[styles.summarySub, { color: theme.textMuted }]}>
-              Total Billed: Rs. {totalRawangiAmt.toLocaleString()}
+              Total Billed: Rs. {Number(totalRawangiAmt || 0).toLocaleString()}
             </Text>
           </View>
 
@@ -197,8 +197,8 @@ export const OutwardScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.amountBox}>
-                  <Text style={[styles.piecesText, { color: theme.textPrimary }]}>{item.totalPieces} Pcs</Text>
-                  <Text style={[styles.amountText, { color: theme.brandBlue }]}>Rs. {item.totalAmount.toLocaleString()}</Text>
+                  <Text style={[styles.piecesText, { color: theme.textPrimary }]}>{Number(item.totalPieces || 0)} Pcs</Text>
+                  <Text style={[styles.amountText, { color: theme.brandBlue }]}>Rs. {Number(item.totalAmount || 0).toLocaleString()}</Text>
                 </View>
               </View>
 
@@ -355,7 +355,7 @@ export const OutwardScreen: React.FC = () => {
         visible={!!deleteTarget}
         title="Delete Outward Challan"
         itemName={deleteTarget?.challanNo || ''}
-        itemSubtitle={`${deleteTarget?.customerName} • ${deleteTarget?.totalPieces} Pcs (Rs. ${deleteTarget?.totalAmount.toLocaleString()})`}
+        itemSubtitle={`${deleteTarget?.customerName || ''} • ${deleteTarget?.totalPieces || 0} Pcs (Rs. ${Number(deleteTarget?.totalAmount || 0).toLocaleString()})`}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />

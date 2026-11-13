@@ -181,7 +181,7 @@ export const PurchasesScreen: React.FC = () => {
 
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={[styles.costVal, { color: theme.brandBlue }]}>
-                    ${item.totalCost.toLocaleString()}
+                    ${Number(item.totalCost || 0).toLocaleString()}
                   </Text>
                   <Text style={[styles.pcsVal, { color: theme.textMuted }]}>{item.totalPcs} Pcs</Text>
                 </View>

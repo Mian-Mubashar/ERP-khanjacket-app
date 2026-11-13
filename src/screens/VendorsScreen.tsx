@@ -62,13 +62,17 @@ export const VendorsScreen: React.FC = () => {
   const [vendors] = useState<Vendor[]>(INITIAL_VENDORS);
   const [search, setSearch] = useState('');
 
-  const filtered = vendors.filter(
-    (v) =>
-      !search ||
-      v.companyName.toLowerCase().includes(search.toLowerCase()) ||
-      v.contactPerson.toLowerCase().includes(search.toLowerCase()) ||
-      v.city.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = vendors.filter((v) => {
+    const q = search.trim().toLowerCase();
+    if (!q) {
+      return true;
+    }
+    return (
+      (v.companyName && v.companyName.toLowerCase().includes(q)) ||
+      (v.contactPerson && v.contactPerson.toLowerCase().includes(q)) ||
+      (v.city && v.city.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -165,13 +169,13 @@ export const VendorsScreen: React.FC = () => {
                 <View style={[styles.figCol, { borderRightColor: theme.border }]}>
                   <Text style={[styles.figLabel, { color: theme.textMuted }]}>TOTAL PURCHASES</Text>
                   <Text style={[styles.figVal, { color: theme.textPrimary }]}>
-                    {item.currency} {item.totalPurchased.toLocaleString()}
+                    {item.currency} {Number(item.totalPurchased || 0).toLocaleString()}
                   </Text>
                 </View>
                 <View style={[styles.figCol, { borderRightColor: theme.border }]}>
                   <Text style={[styles.figLabel, { color: theme.textMuted }]}>PAID</Text>
                   <Text style={[styles.figVal, { color: theme.success }]}>
-                    {item.currency} {item.totalPaid.toLocaleString()}
+                    {item.currency} {Number(item.totalPaid || 0).toLocaleString()}
                   </Text>
                 </View>
                 <View style={[styles.figCol, { borderRightWidth: 0 }]}>
@@ -182,7 +186,7 @@ export const VendorsScreen: React.FC = () => {
                       { color: hasDue ? theme.danger : theme.success, fontWeight: '800' },
                     ]}
                   >
-                    {hasDue ? `${item.currency} ${item.balanceDue.toLocaleString()}` : 'Settled'}
+                    {hasDue ? `${item.currency} ${Number(item.balanceDue || 0).toLocaleString()}` : 'Settled'}
                   </Text>
                 </View>
               </View>

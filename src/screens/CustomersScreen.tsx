@@ -53,9 +53,9 @@ export const CustomersScreen: React.FC = () => {
     const query = search.trim().toLowerCase();
     const matchesSearch =
       !query ||
-      c.shopName.toLowerCase().includes(query) ||
-      c.shopkeeperName.toLowerCase().includes(query) ||
-      c.city.toLowerCase().includes(query) ||
+      (c.shopName && c.shopName.toLowerCase().includes(query)) ||
+      (c.shopkeeperName && c.shopkeeperName.toLowerCase().includes(query)) ||
+      (c.city && c.city.toLowerCase().includes(query)) ||
       (c.phone && c.phone.includes(query));
 
     if (!matchesSearch) {
@@ -321,18 +321,18 @@ export const CustomersScreen: React.FC = () => {
                 >
                   <View style={[styles.figureBox, { borderRightColor: theme.border }]}>
                     <Text style={[styles.figureLabel, { color: theme.textMuted }]}>MAL SENT</Text>
-                    <Text style={[styles.figureValue, { color: theme.textPrimary }]}>{item.totalPieces} Pcs</Text>
+                    <Text style={[styles.figureValue, { color: theme.textPrimary }]}>{Number(item.totalPieces || 0)} Pcs</Text>
                   </View>
 
                   <View style={[styles.figureBox, { borderRightColor: theme.border }]}>
                     <Text style={[styles.figureLabel, { color: theme.textMuted }]}>TOTAL BILL</Text>
-                    <Text style={[styles.figureValue, { color: theme.textPrimary }]}>Rs. {item.totalBilled.toLocaleString()}</Text>
+                    <Text style={[styles.figureValue, { color: theme.textPrimary }]}>Rs. {Number(item.totalBilled || 0).toLocaleString()}</Text>
                   </View>
 
                   <View style={[styles.figureBox, { borderRightColor: theme.border }]}>
                     <Text style={[styles.figureLabel, { color: theme.textMuted }]}>WASOOLI</Text>
                     <Text style={[styles.figureValue, { color: theme.success }]}>
-                      Rs. {item.totalPaid.toLocaleString()}
+                      Rs. {Number(item.totalPaid || 0).toLocaleString()}
                     </Text>
                   </View>
 
@@ -344,7 +344,7 @@ export const CustomersScreen: React.FC = () => {
                         { color: hasDue ? theme.danger : theme.success, fontWeight: '800' },
                       ]}
                     >
-                      {hasDue ? `Rs. ${item.remainingBalance.toLocaleString()}` : 'Settled'}
+                      {hasDue ? `Rs. ${Number(item.remainingBalance || 0).toLocaleString()}` : 'Settled'}
                     </Text>
                   </View>
                 </View>

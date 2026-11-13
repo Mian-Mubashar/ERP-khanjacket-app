@@ -47,15 +47,15 @@ export const ArticlesScreen: React.FC = () => {
     loadArticles();
   }, []);
 
-  const categories = ['ALL', ...Array.from(new Set(articles.map((a) => a.category)))];
+  const categories = ['ALL', ...Array.from(new Set(articles.map((a) => a.category || 'General')))];
 
   const filteredArticles = articles.filter((a) => {
     const q = search.trim().toLowerCase();
     const matchesSearch =
       !q ||
-      a.articleNo.toLowerCase().includes(q) ||
-      a.name.toLowerCase().includes(q) ||
-      a.category.toLowerCase().includes(q);
+      (a.articleNo && a.articleNo.toLowerCase().includes(q)) ||
+      (a.name && a.name.toLowerCase().includes(q)) ||
+      (a.category && a.category.toLowerCase().includes(q));
 
     if (!matchesSearch) {
       return false;
@@ -206,7 +206,7 @@ export const ArticlesScreen: React.FC = () => {
             Showing <Text style={{ fontWeight: '800', color: theme.textPrimary }}>{filteredArticles.length}</Text> Articles
           </Text>
           <Text style={[styles.summaryStock, { color: theme.success }]}>
-            Warehouse Stock: <Text style={{ fontWeight: '800' }}>{totalStockPieces.toLocaleString()} Pcs</Text>
+            Warehouse Stock: <Text style={{ fontWeight: '800' }}>{Number(totalStockPieces || 0).toLocaleString()} Pcs</Text>
           </Text>
         </View>
       </View>
@@ -298,13 +298,13 @@ export const ArticlesScreen: React.FC = () => {
                   <View style={styles.attrCol}>
                     <Text style={[styles.attrLabel, { color: theme.textMuted }]}>WHOLESALE RATE</Text>
                     <Text style={[styles.attrVal, { color: theme.textPrimary }]}>
-                      Rs. {item.unitPrice.toLocaleString()}
+                      Rs. {Number(item.unitPrice || 0).toLocaleString()}
                     </Text>
                   </View>
                   <View style={styles.attrCol}>
                     <Text style={[styles.attrLabel, { color: theme.textMuted }]}>TOTAL VALUE</Text>
                     <Text style={[styles.attrVal, { color: theme.brandBlue }]}>
-                      Rs. {(item.currentStock * item.unitPrice).toLocaleString()}
+                      Rs. {(Number(item.currentStock || 0) * Number(item.unitPrice || 0)).toLocaleString()}
                     </Text>
                   </View>
                   <View style={styles.attrCol}>
@@ -322,8 +322,8 @@ export const ArticlesScreen: React.FC = () => {
 
                 {/* Actions & Color/Sizes Row */}
                 <View style={[styles.cardActionsRow, { borderTopColor: theme.border }]}>
-                  <Text style={[styles.colorsText, { color: theme.textMuted }]}>
-                    Colors: {item.color || 'Standard'} • Sizes: {item.sizes ? item.sizes.join(', ') : 'All'}
+                  <Text style={[styles.colorsText, { color: theme.textMuted }]} numberOfLines={2}>
+                    Colors: {item.color || 'Standard'} • Sizes: {Array.isArray(item.sizes) ? item.sizes.join(', ') : String(item.sizes || 'All')}
                   </Text>
 
                   <View style={styles.actionBtnGroup}>
@@ -666,11 +666,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   colorsText: {
+    flex: 1,
     fontSize: 10,
+    marginRight: 8,
   },
   actionBtnGroup: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
+    flexShrink: 0,
+    alignItems: 'center',
   },
   editBtn: {
     paddingVertical: 4,

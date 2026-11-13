@@ -51,13 +51,15 @@ export const ClearanceScreen: React.FC = () => {
   const [bills] = useState<ClearanceBill[]>(INITIAL_CLEARANCE);
   const [search, setSearch] = useState('');
 
-  const filtered = bills.filter(
-    (b) =>
-      !search ||
-      b.billNo.toLowerCase().includes(search.toLowerCase()) ||
-      b.clearingAgent.toLowerCase().includes(search.toLowerCase()) ||
-      b.containerNo.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = bills.filter((b) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      (b.billNo && b.billNo.toLowerCase().includes(q)) ||
+      (b.clearingAgent && b.clearingAgent.toLowerCase().includes(q)) ||
+      (b.containerNo && b.containerNo.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -160,10 +162,10 @@ export const ClearanceScreen: React.FC = () => {
                       { color: hasDue ? theme.danger : theme.success },
                     ]}
                   >
-                    {hasDue ? `Due: Rs. ${item.remainingDue.toLocaleString()}` : 'Settled'}
+                    {hasDue ? `Due: Rs. ${Number(item.remainingDue || 0).toLocaleString()}` : 'Settled'}
                   </Text>
                   <Text style={[styles.totalCharges, { color: theme.textMuted }]}>
-                    Total: Rs. {item.dutyCharges.toLocaleString()}
+                    Total: Rs. {Number(item.dutyCharges || 0).toLocaleString()}
                   </Text>
                 </View>
               </View>
@@ -173,7 +175,7 @@ export const ClearanceScreen: React.FC = () => {
                   Container: <Text style={{ fontWeight: '700', color: theme.textPrimary }}>{item.containerNo}</Text>
                 </Text>
                 <Text style={[styles.paidText, { color: theme.success }]}>
-                  Paid: Rs. {item.paidAmount.toLocaleString()}
+                  Paid: Rs. {Number(item.paidAmount || 0).toLocaleString()}
                 </Text>
               </View>
             </View>

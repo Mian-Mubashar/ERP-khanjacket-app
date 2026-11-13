@@ -10,6 +10,7 @@ import {
 import { colors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 import { MetricCard } from '../components/MetricCard';
+import { DashboardCharts } from '../components/DashboardCharts';
 import { mobileApi, Customer, OutwardRecord } from '../services/api';
 import { ScreenName } from '../components/SidebarDrawer';
 
@@ -155,7 +156,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
       <View style={styles.metricsSection}>
         <MetricCard
           title="Total Mal Sent"
-          value={`${metrics.totalMalSent.toLocaleString()} Pcs`}
+          value={`${Number(metrics.totalMalSent || 0).toLocaleString()} Pcs`}
           subtitle="Total wholesale garments dispatched"
           icon="🚚"
           variant="blue"
@@ -163,7 +164,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
 
         <MetricCard
           title="Total Billed"
-          value={`Rs. ${metrics.totalBilled.toLocaleString()}`}
+          value={`Rs. ${Number(metrics.totalBilled || 0).toLocaleString()}`}
           subtitle="Total bill value across all shops"
           icon="📈"
           variant="purple"
@@ -171,7 +172,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
 
         <MetricCard
           title="Payment Received (Wasooli)"
-          value={`Rs. ${metrics.totalReceived.toLocaleString()}`}
+          value={`Rs. ${Number(metrics.totalReceived || 0).toLocaleString()}`}
           subtitle="Total cash & bank wasooli recorded"
           icon="✓"
           variant="green"
@@ -179,7 +180,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
 
         <MetricCard
           title="Outstanding Balance Due"
-          value={`Rs. ${metrics.totalDue.toLocaleString()}`}
+          value={`Rs. ${Number(metrics.totalDue || 0).toLocaleString()}`}
           subtitle="Pending customer khata baqaya"
           icon="⚠️"
           variant="red"
@@ -233,7 +234,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                 {item.totalPieces} Pcs
               </Text>
               <Text style={[styles.itemBill, { color: theme.textMuted }]}>
-                Rs. {item.totalAmount.toLocaleString()}
+                Rs. {Number(item.totalAmount || 0).toLocaleString()}
               </Text>
             </View>
           </View>
@@ -290,7 +291,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
                   { color: theme.isDarkMode ? '#fb7185' : colors.danger },
                 ]}
               >
-                Rs. {cust.remainingBalance.toLocaleString()}
+                Rs. {Number(cust.remainingBalance || 0).toLocaleString()}
               </Text>
               <Text style={[styles.itemBill, { color: theme.textMuted }]}>
                 Due Baqaya
@@ -298,6 +299,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
             </View>
           </View>
         ))}
+      </View>
+
+      {/* Analytics Charts & Graphs at the Very Bottom of Dashboard */}
+      <View style={styles.chartsBottomWrapper}>
+        <DashboardCharts />
       </View>
     </ScrollView>
   );
@@ -410,7 +416,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   bottomBox: {
-    marginBottom: 30,
+    marginBottom: 14,
+  },
+  chartsBottomWrapper: {
+    marginBottom: 35,
   },
   cardHeader: {
     flexDirection: 'row',

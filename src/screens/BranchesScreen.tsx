@@ -128,7 +128,7 @@ export const BranchesScreen: React.FC = () => {
               <View style={[styles.areasContainer, { borderTopColor: theme.border }]}>
                 <Text style={[styles.areasLabel, { color: theme.textMuted }]}>AREAS / LOCALITIES:</Text>
                 <View style={styles.tagsWrapper}>
-                  {item.areas.length > 0 ? (
+                  {Array.isArray(item.areas) && item.areas.length > 0 ? (
                     item.areas.map((area, idx) => (
                       <View
                         key={idx}

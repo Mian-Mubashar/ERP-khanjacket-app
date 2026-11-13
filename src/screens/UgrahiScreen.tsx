@@ -126,7 +126,7 @@ export const UgrahiScreen: React.FC = () => {
             {ugrahiCustomers.length} Accounts Scheduled for Wasooli
           </Text>
           <Text style={[styles.summaryDue, { color: theme.danger }]}>
-            Outstanding: Rs. {totalDueOnRoute.toLocaleString()}
+            Outstanding: Rs. {Number(totalDueOnRoute || 0).toLocaleString()}
           </Text>
         </View>
       </View>
@@ -171,7 +171,7 @@ export const UgrahiScreen: React.FC = () => {
                         { color: hasDue ? theme.danger : theme.success },
                       ]}
                     >
-                      {hasDue ? `Rs. ${item.remainingBalance.toLocaleString()}` : 'Settled'}
+                      {hasDue ? `Rs. ${Number(item.remainingBalance || 0).toLocaleString()}` : 'Settled'}
                     </Text>
                     <Text style={[styles.balanceLabel, { color: theme.textMuted }]}>Khata Balance</Text>
                   </View>
@@ -234,7 +234,7 @@ export const UgrahiScreen: React.FC = () => {
                   {targetCust?.shopkeeperName} • {targetCust?.city}
                 </Text>
                 <Text style={[styles.targetShopDue, { color: theme.danger }]}>
-                  Pending Khata Baqaya: Rs. {targetCust?.remainingBalance.toLocaleString()}
+                  Pending Khata Baqaya: Rs. {Number(targetCust?.remainingBalance || 0).toLocaleString()}
                 </Text>
               </View>
 
