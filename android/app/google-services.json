@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1068631121630",
+    "project_id": "khan-warehouse-app",
+    "storage_bucket": "khan-warehouse-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1068631121630:android:f70c72d9f99421a405ac4f",
+        "android_client_info": {
+          "package_name": "com.warehouseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAabvve9OqexKXy97Tn6J_XQe04NKFTs6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

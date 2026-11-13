@@ -1,4 +1,11 @@
+
 {
   "name": "WarehouseApp",
-  "displayName": "WarehouseApp"
+  "displayName": "WarehouseApp",
+  "slug": "khan-jacket-house",
+  "extra": {
+    "eas": {
+      "projectId": "083f4faa-582e-4b84-a93b-3d3fa92f5f73"
+    }
+  }
 }

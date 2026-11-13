@@ -1,105 +1,154 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
-  Pressable,
   View,
 } from 'react-native';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { HeaderNavbar } from './src/components/HeaderNavbar';
+import { SidebarDrawer, ScreenName } from './src/components/SidebarDrawer';
+import { BottomTabBar } from './src/components/BottomTabBar';
 
-const tabs = ['Home', 'Stock', 'Orders'] as const;
-type Tab = (typeof tabs)[number];
+// All 13 Portal Screens matching web sidebar
+import { DashboardScreen } from './src/screens/DashboardScreen';
+import { BranchesScreen } from './src/screens/BranchesScreen';
+import { CustomersScreen } from './src/screens/CustomersScreen';
+import { VendorsScreen } from './src/screens/VendorsScreen';
+import { ArticlesScreen } from './src/screens/ArticlesScreen';
+import { PurchasesScreen } from './src/screens/PurchasesScreen';
+import { ClearanceScreen } from './src/screens/ClearanceScreen';
+import { OutwardScreen } from './src/screens/OutwardScreen';
+import { UgrahiScreen } from './src/screens/UgrahiScreen';
+import { ReportsScreen } from './src/screens/ReportsScreen';
+import { AnnouncementsScreen } from './src/screens/AnnouncementsScreen';
+import { SecurityScreen } from './src/screens/SecurityScreen';
+import { ProfileScreen } from './src/screens/ProfileScreen';
 
-function App(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<Tab>('Home');
+function MainApp(): React.JSX.Element {
+  const { isDarkMode, theme, toggleDarkMode } = useTheme();
+  const [currentScreen, setCurrentScreen] = useState<ScreenName>('Dashboard');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [refreshKey] = useState(0);
+
+  const getScreenTitle = (screen: ScreenName): string => {
+    switch (screen) {
+      case 'Dashboard':
+        return 'Overview & Analytics';
+      case 'Branches':
+        return 'Branches & Cities (Shehar)';
+      case 'Customers':
+        return 'Customers & Shopkeepers';
+      case 'Vendors':
+        return 'Vendors (China Factory)';
+      case 'Articles':
+        return 'Articles (Garments Stock)';
+      case 'Purchases':
+        return 'China Purchases (Shipments)';
+      case 'Clearance':
+        return 'Khan Traders Clearance';
+      case 'Outward':
+        return 'Outward (Maal Rawangi)';
+      case 'Ugrahi':
+        return 'Payment Collection (Route Sheets)';
+      case 'Reports':
+        return 'Reports (Hisaab Kitaab)';
+      case 'Announcements':
+        return 'Announcements & Alerts';
+      case 'Security':
+        return 'Security (Mobile Devices)';
+      case 'Profile':
+        return 'Admin Profile & Settings';
+      default:
+        return 'Khan Jacket House';
+    }
+  };
+
+  const renderActiveScreen = () => {
+    switch (currentScreen) {
+      case 'Dashboard':
+        return <DashboardScreen key={refreshKey} onNavigate={setCurrentScreen} />;
+      case 'Branches':
+        return <BranchesScreen key={refreshKey} />;
+      case 'Customers':
+        return <CustomersScreen key={refreshKey} />;
+      case 'Vendors':
+        return <VendorsScreen key={refreshKey} />;
+      case 'Articles':
+        return <ArticlesScreen key={refreshKey} />;
+      case 'Purchases':
+        return <PurchasesScreen key={refreshKey} />;
+      case 'Clearance':
+        return <ClearanceScreen key={refreshKey} />;
+      case 'Outward':
+        return <OutwardScreen key={refreshKey} />;
+      case 'Ugrahi':
+        return <UgrahiScreen key={refreshKey} />;
+      case 'Reports':
+        return <ReportsScreen key={refreshKey} />;
+      case 'Announcements':
+        return <AnnouncementsScreen key={refreshKey} onNavigate={setCurrentScreen} />;
+      case 'Security':
+        return <SecurityScreen key={refreshKey} />;
+      case 'Profile':
+        return <ProfileScreen key={refreshKey} onNavigate={setCurrentScreen} />;
+      default:
+        return <DashboardScreen key={refreshKey} onNavigate={setCurrentScreen} />;
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#17324d" />
-      <View style={styles.navbar}>
-        <Text style={styles.brand}>Warehouse</Text>
-        <View style={styles.tabs}>
-          {tabs.map(tab => (
-            <Pressable
-              key={tab}
-              accessibilityRole="button"
-              accessibilityState={{selected: activeTab === tab}}
-              onPress={() => setActiveTab(tab)}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}>
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}>
-                {tab}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={isDarkMode ? '#020617' : theme.brandDark}
+      />
+
+      {/* Top Header with Logo, Dark Mode, Notifications Bell & Global Search */}
+      <HeaderNavbar
+        title={getScreenTitle(currentScreen)}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onNavigate={(screen) => setCurrentScreen(screen)}
+      />
+
+      {/* Active Screen View */}
+      <View style={[styles.screenContainer, { backgroundColor: theme.background }]}>
+        {renderActiveScreen()}
       </View>
-      <View style={styles.content}>
-        <Text style={styles.heading}>{activeTab}</Text>
-        <Text style={styles.description}>
-          Welcome to your warehouse.
-        </Text>
-      </View>
+
+      {/* Docked Bottom Tab Navigation Bar with all 13 modules & All Menus Sheet */}
+      <BottomTabBar
+        currentScreen={currentScreen}
+        onSelectScreen={(screen) => setCurrentScreen(screen)}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+      />
+
+      {/* Sliding Sidebar Drawer with all 13 Portal Modules */}
+      <SidebarDrawer
+        isOpen={isDrawerOpen}
+        currentScreen={currentScreen}
+        onSelectScreen={(screen) => setCurrentScreen(screen)}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </SafeAreaView>
+  );
+}
+
+export default function App(): React.JSX.Element {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f6f8',
   },
-  navbar: {
-    minHeight: 64,
-    paddingHorizontal: 16,
-    backgroundColor: '#17324d',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  brand: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  tabs: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 9,
-    marginLeft: 4,
-    borderRadius: 6,
-  },
-  activeTab: {
-    backgroundColor: '#ffffff',
-  },
-  tabText: {
-    color: '#d7e2ec',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: '#17324d',
-  },
-  content: {
-    padding: 24,
-  },
-  heading: {
-    color: '#17324d',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  description: {
-    marginTop: 8,
-    color: '#5d6b78',
-    fontSize: 16,
+  screenContainer: {
+    flex: 1,
   },
 });
-
-export default App;
