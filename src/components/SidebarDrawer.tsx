@@ -8,8 +8,10 @@ import {
   Dimensions,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { PortalIcon } from './PortalIcon';
 
 const { width } = Dimensions.get('window');
@@ -67,6 +69,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   onClose,
 }) => {
   const { theme } = useTheme();
+  const { logout } = useAuth();
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -240,7 +243,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             })}
           </ScrollView>
 
-          {/* Drawer Footer */}
+          {/* Drawer Footer with Logout Action */}
           <View
             style={[
               styles.drawerFooter,
@@ -250,6 +253,39 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
               },
             ]}
           >
+            <Pressable
+              style={({ pressed }) => [
+                styles.drawerLogoutBtn,
+                {
+                  backgroundColor: theme.dangerLight,
+                  borderColor: theme.dangerBorder,
+                },
+                pressed && { opacity: 0.8 },
+              ]}
+              onPress={() => {
+                Alert.alert(
+                  'Sign Out',
+                  'Are you sure you want to log out of the Khan Jacket House portal?',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Sign Out',
+                      style: 'destructive',
+                      onPress: () => {
+                        onClose();
+                        logout();
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Text style={styles.drawerLogoutIcon}>🚪</Text>
+              <Text style={[styles.drawerLogoutText, { color: theme.danger }]}>
+                Sign Out (Log Out)
+              </Text>
+            </Pressable>
+
             <Text style={[styles.footerBrand, { color: theme.textSecondary }]}>
               Khan Clothes ERP v2.0
             </Text>
@@ -416,6 +452,25 @@ const styles = StyleSheet.create({
     padding: 12,
     borderTopWidth: 1,
     alignItems: 'center',
+  },
+  drawerLogoutBtn: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 10,
+    gap: 8,
+  },
+  drawerLogoutIcon: {
+    fontSize: 14,
+  },
+  drawerLogoutText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   footerBrand: {
     fontSize: 11,

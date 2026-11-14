@@ -6,10 +6,12 @@ import {
   View,
 } from 'react-native';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { HeaderNavbar } from './src/components/HeaderNavbar';
 import { SidebarDrawer, ScreenName } from './src/components/SidebarDrawer';
 import { BottomTabBar } from './src/components/BottomTabBar';
 import { PushNotificationService } from './src/services/PushNotificationService';
+import { LoginScreen } from './src/screens/LoginScreen';
 
 // All 13 Portal Screens matching web sidebar
 import { DashboardScreen } from './src/screens/DashboardScreen';
@@ -28,6 +30,7 @@ import { ProfileScreen } from './src/screens/ProfileScreen';
 
 function MainApp(): React.JSX.Element {
   const { isDarkMode, theme, toggleDarkMode } = useTheme();
+  const { isAuthenticated } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('Dashboard');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [refreshKey] = useState(0);
@@ -121,6 +124,10 @@ function MainApp(): React.JSX.Element {
     }
   };
 
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar
@@ -163,7 +170,9 @@ function MainApp(): React.JSX.Element {
 export default function App(): React.JSX.Element {
   return (
     <ThemeProvider>
-      <MainApp />
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

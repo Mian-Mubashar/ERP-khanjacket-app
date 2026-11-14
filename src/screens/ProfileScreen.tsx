@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { ScreenName } from '../components/SidebarDrawer';
 import { API_BASE_URL } from '../services/api';
 
@@ -16,8 +17,9 @@ interface ProfileScreenProps {
   onNavigate?: (screen: ScreenName) => void;
 }
 
-export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate }) => {
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate: _onNavigate }) => {
   const { isDarkMode, theme, toggleDarkMode } = useTheme();
+  const { user, logout } = useAuth();
 
   const handleClearCache = () => {
     Alert.alert(
@@ -37,9 +39,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate }) => {
           text: 'Sign Out',
           style: 'destructive',
           onPress: () => {
-            if (onNavigate) {
-              onNavigate('Dashboard');
-            }
+            logout();
           },
         },
       ]
@@ -64,12 +64,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate }) => {
       >
         <View style={styles.avatarRow}>
           <View style={[styles.avatarCircle, { backgroundColor: theme.brandBlue }]}>
-            <Text style={styles.avatarLetter}>A</Text>
+            <Text style={styles.avatarLetter}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+            </Text>
           </View>
           <View style={styles.userInfoBox}>
             <View style={styles.nameRow}>
               <Text style={[styles.userName, { color: theme.textPrimary }]}>
-                Admin Portal
+                {user?.name || 'Khan Admin'}
               </Text>
               <View
                 style={[
@@ -78,12 +80,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate }) => {
                 ]}
               >
                 <Text style={[styles.verifiedText, { color: theme.brandBlue }]}>
-                  Super Admin
+                  {user?.role || 'Super Admin'}
                 </Text>
               </View>
             </View>
             <Text style={[styles.userEmail, { color: theme.textSecondary }]}>
-              admin@khanjacket.com
+              {user?.email || 'admin@khanclothes.com'}
             </Text>
             <View style={styles.statusRow}>
               <View style={[styles.statusDot, { backgroundColor: theme.success }]} />
