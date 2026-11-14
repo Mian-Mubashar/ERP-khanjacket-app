@@ -4,6 +4,7 @@
  */
 import { Platform, PermissionsAndroid, Alert } from 'react-native';
 import { API_BASE_URL } from './api';
+import { ENV } from '../config/env';
 
 export interface PushNotificationPayload {
   title?: string;
@@ -123,7 +124,7 @@ class PushNotificationManager {
         platform: Platform.OS,
         deviceName: `${Platform.OS === 'ios' ? 'iPhone' : 'Android'} Device`,
         deviceId: `DEV-${Platform.OS}-${token.slice(-8)}`,
-        appVersion: '1.0.0',
+        appVersion: ENV.APP_VERSION,
       };
 
       const response = await fetch(`${API_BASE_URL}/notifications/register-device`, {

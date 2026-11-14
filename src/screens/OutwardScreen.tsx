@@ -203,7 +203,7 @@ export const OutwardScreen: React.FC = () => {
               </View>
 
               <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
-                <Text style={[styles.transportText, { color: theme.textMuted }]}>
+                <Text style={[styles.transportText, { color: theme.textMuted }]} numberOfLines={1}>
                   Cargo: {item.transportName || 'Standard Goods Bilty'}
                 </Text>
 
@@ -482,9 +482,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   transportText: {
+    flex: 1,
     fontSize: 10,
+    marginRight: 8,
   },
   deleteBtn: {
+    flexShrink: 0,
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,

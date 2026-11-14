@@ -703,12 +703,16 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   khataIdText: {
+    flex: 1,
     fontSize: 10,
     fontFamily: 'monospace',
+    marginRight: 8,
   },
   actionsGroup: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
+    flexShrink: 0,
+    alignItems: 'center',
   },
   editBtn: {
     paddingVertical: 4,

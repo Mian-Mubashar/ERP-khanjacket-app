@@ -3,6 +3,8 @@
  * Connects to Express/MySQL backend with reliable offline mock fallback
  */
 
+import { getDefaultApiUrl } from '../config/env';
+
 export interface Customer {
   id: number;
   shopName: string;
@@ -64,8 +66,8 @@ export interface CityRecord {
   areas: string[];
 }
 
-// Configurable Backend API URL (Default for Android emulator is 10.0.2.2:5000)
-export let API_BASE_URL = 'http://10.0.2.2:5000/api/v1';
+// Configurable Backend API URL (Loaded from .env with fallback)
+export let API_BASE_URL = getDefaultApiUrl();
 
 export const setApiBaseUrl = (url: string) => {
   API_BASE_URL = url.trim().replace(/\/+$/, '');

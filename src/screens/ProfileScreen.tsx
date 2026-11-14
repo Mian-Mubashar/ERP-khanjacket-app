@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { ScreenName } from '../components/SidebarDrawer';
+import { API_BASE_URL } from '../services/api';
 
 interface ProfileScreenProps {
   onNavigate?: (screen: ScreenName) => void;
@@ -176,7 +177,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onNavigate }) => {
         <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
           <Text style={[styles.infoLabel, { color: theme.textMuted }]}>Server URL</Text>
           <Text style={[styles.infoValue, { color: theme.brandBlue }]}>
-            http://10.0.2.2:5000 / localhost:5000
+            {API_BASE_URL}
           </Text>
         </View>
 
