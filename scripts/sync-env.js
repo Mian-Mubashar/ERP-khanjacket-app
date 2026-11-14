@@ -102,6 +102,9 @@ export interface AppEnvironment {
   APPLE_AUTH_KEY_P8_PATH: string;
 }
 
+export const APP_VERSION = '${appVersion}';
+export const APP_NAME = '${appName}';
+
 export const ENV: AppEnvironment = {
   APP_ENV: '${appEnv}' as AppEnvironment['APP_ENV'],
   APP_NAME: '${appName}',

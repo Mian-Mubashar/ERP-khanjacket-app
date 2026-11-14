@@ -32,6 +32,9 @@ export interface AppEnvironment {
   APPLE_AUTH_KEY_P8_PATH: string;
 }
 
+export const APP_VERSION = '1.0.0';
+export const APP_NAME = 'Khan Jacket House';
+
 export const ENV: AppEnvironment = {
   APP_ENV: 'development' as AppEnvironment['APP_ENV'],
   APP_NAME: 'Khan Jacket House',

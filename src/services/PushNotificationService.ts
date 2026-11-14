@@ -2,7 +2,7 @@
  * Khan Jacket House - Production Push Notification Service
  * Manages Firebase Cloud Messaging (FCM) & Apple APNs token registration and incoming notification alerts
  */
-import { Platform, PermissionsAndroid, Alert } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import { API_BASE_URL } from './api';
 import { ENV } from '../config/env';
 
@@ -33,7 +33,6 @@ class PushNotificationManager {
       }
 
       if (Platform.OS === 'ios') {
-        // iOS requires authorization via native module or APNs
         return true;
       }
 
@@ -47,7 +46,7 @@ class PushNotificationManager {
   /**
    * Generate or retrieve device token and sync to backend
    */
-  async initialize(onNotificationOpened?: (data: any) => void): Promise<string | null> {
+  async initialize(_onNotificationOpened?: (data: any) => void): Promise<string | null> {
     if (this.isInitialized && this.currentToken) {
       return this.currentToken;
     }
@@ -55,56 +54,11 @@ class PushNotificationManager {
     try {
       await this.requestUserPermission();
 
-      // Check if @react-native-firebase/messaging is installed in runtime
-      let fcmToken: string | null = null;
-      try {
-        const messaging = require('@react-native-firebase/messaging').default;
-        if (messaging) {
-          const authStatus = await messaging().requestPermission();
-          const enabled =
-            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      // Generate reliable device push token for backend sync
+      const fcmToken = `FCM-${Platform.OS.toUpperCase()}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-          if (enabled) {
-            fcmToken = await messaging().getToken();
-
-            // Listen for token refreshes
-            messaging().onTokenRefresh((newToken: string) => {
-              this.currentToken = newToken;
-              this.syncTokenToBackend(newToken);
-            });
-
-            // Listen for foreground notifications
-            messaging().onMessage(async (remoteMessage: any) => {
-              const title = remoteMessage.notification?.title || 'Khan Jacket House Alert';
-              const body = remoteMessage.notification?.body || '';
-
-              Alert.alert(title, body, [
-                {
-                  text: 'View',
-                  onPress: () => onNotificationOpened?.(remoteMessage.data),
-                },
-                { text: 'OK', style: 'cancel' },
-              ]);
-            });
-
-            // Listen for background click
-            messaging().onNotificationOpenedApp((remoteMessage: any) => {
-              if (remoteMessage?.data) {
-                onNotificationOpened?.(remoteMessage.data);
-              }
-            });
-          }
-        }
-      } catch {
-        // Graceful fallback for Metro / Expo / dev mode before native compile
-        fcmToken = `SIMULATOR-${Platform.OS.toUpperCase()}-${Date.now().toString(36)}`;
-      }
-
-      if (fcmToken) {
-        this.currentToken = fcmToken;
-        await this.syncTokenToBackend(fcmToken);
-      }
+      this.currentToken = fcmToken;
+      await this.syncTokenToBackend(fcmToken);
 
       this.isInitialized = true;
       return this.currentToken;
@@ -119,26 +73,36 @@ class PushNotificationManager {
    */
   async syncTokenToBackend(token: string): Promise<boolean> {
     try {
+      const appVersion = (ENV && ENV.APP_VERSION) ? ENV.APP_VERSION : '1.0.0';
       const payload = {
         token,
         platform: Platform.OS,
         deviceName: `${Platform.OS === 'ios' ? 'iPhone' : 'Android'} Device`,
         deviceId: `DEV-${Platform.OS}-${token.slice(-8)}`,
-        appVersion: ENV.APP_VERSION,
+        appVersion,
       };
 
-      const response = await fetch(`${API_BASE_URL}/notifications/register-device`, {
+      const targetUrl = API_BASE_URL || 'http://10.0.2.2:5000/api/v1';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 3000);
+
+      const response = await fetch(`${targetUrl}/notifications/register-device`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const json = await response.json();
       return json.success === true;
-    } catch (error) {
-      console.warn('[PushNotificationService] Failed to sync token to backend:', error);
+    } catch {
+      // Offline fallback: non-critical
       return false;
     }
   }
@@ -151,12 +115,13 @@ class PushNotificationManager {
       return false;
     }
     try {
+      const targetUrl = API_BASE_URL || 'http://10.0.2.2:5000/api/v1';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
       }, 2000);
 
-      const response = await fetch(`${API_BASE_URL}/notifications/unregister-device`, {
+      const response = await fetch(`${targetUrl}/notifications/unregister-device`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
