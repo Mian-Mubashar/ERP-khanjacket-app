@@ -189,19 +189,20 @@ class AuthenticationManager {
   }
 
   /**
-   * Secure Sign Out - clears tokens and device push registration
+   * Secure Sign Out - immediately clears tokens and notifies UI, unregisters device asynchronously
    */
   async logout(): Promise<void> {
-    try {
-      await PushNotificationService.unregisterToken();
-    } catch (err) {
-      console.warn('[AuthService] Error unregistering push token during logout:', err);
-    }
-
+    // 1. Immediately clear authentication state so UI transitions instantly to LoginScreen
     this.currentUser = null;
     this.authToken = null;
     this.notify();
+
+    // 2. Unregister push notification token from backend non-blockingly
+    PushNotificationService.unregisterToken().catch((err) => {
+      console.warn('[AuthService] Non-critical push token unregister error:', err);
+    });
   }
 }
 
 export const AuthService = new AuthenticationManager();
+

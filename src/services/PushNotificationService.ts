@@ -151,17 +151,26 @@ class PushNotificationManager {
       return false;
     }
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 2000);
+
       const response = await fetch(`${API_BASE_URL}/notifications/unregister-device`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token: this.currentToken }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
       const json = await response.json();
       this.currentToken = null;
       return json.success === true;
     } catch {
+      this.currentToken = null;
       return false;
     }
   }

@@ -35,6 +35,14 @@ function MainApp(): React.JSX.Element {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [refreshKey] = useState(0);
 
+  // When logged out, reset active screen to Dashboard and close drawer
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentScreen('Dashboard');
+      setIsDrawerOpen(false);
+    }
+  }, [isAuthenticated]);
+
   // Initialize push notification listener & sync token to backend on app launch
   useEffect(() => {
     PushNotificationService.initialize((data) => {
