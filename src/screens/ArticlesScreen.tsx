@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   Pressable,
-  ActivityIndicator,
   Modal,
   ScrollView,
 } from 'react-native';
@@ -16,8 +15,7 @@ import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 
 export const ArticlesScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<Article[]>(() => mobileApi.getArticlesSync());
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
@@ -35,11 +33,10 @@ export const ArticlesScreen: React.FC = () => {
 
   const loadArticles = async () => {
     try {
-      setLoading(true);
       const data = await mobileApi.getArticles();
       setArticles(data);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep reactive offline store
     }
   };
 
@@ -212,12 +209,7 @@ export const ArticlesScreen: React.FC = () => {
       </View>
 
       {/* Articles List */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.brandBlue} />
-        </View>
-      ) : (
-        <FlatList
+      <FlatList
           data={filteredArticles}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
@@ -322,9 +314,11 @@ export const ArticlesScreen: React.FC = () => {
 
                 {/* Actions & Color/Sizes Row */}
                 <View style={[styles.cardActionsRow, { borderTopColor: theme.border }]}>
-                  <Text style={[styles.colorsText, { color: theme.textMuted }]} numberOfLines={2}>
-                    Colors: {item.color || 'Standard'} • Sizes: {Array.isArray(item.sizes) ? item.sizes.join(', ') : String(item.sizes || 'All')}
-                  </Text>
+                  <View style={styles.colorsContainer}>
+                    <Text style={[styles.colorsText, { color: theme.textMuted }]} numberOfLines={2} ellipsizeMode="tail">
+                      Colors: {item.color || 'Standard'} • Sizes: {Array.isArray(item.sizes) ? item.sizes.join(', ') : String(item.sizes || 'All')}
+                    </Text>
+                  </View>
 
                   <View style={styles.actionBtnGroup}>
                     <Pressable
@@ -364,7 +358,6 @@ export const ArticlesScreen: React.FC = () => {
             </View>
           }
         />
-      )}
 
       {/* Edit / Add Modal */}
       <Modal
@@ -593,6 +586,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
+    overflow: 'hidden',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -664,11 +658,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 8,
     borderTopWidth: 1,
+    width: '100%',
+  },
+  colorsContainer: {
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
+    justifyContent: 'center',
   },
   colorsText: {
-    flex: 1,
     fontSize: 10,
-    marginRight: 8,
+    lineHeight: 14,
   },
   actionBtnGroup: {
     flexDirection: 'row',
@@ -677,20 +677,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
     borderRadius: 6,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   editBtnText: {
     fontSize: 11,
     fontWeight: '700',
   },
   deleteBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
     borderRadius: 6,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   deleteBtnText: {
     fontSize: 11,

@@ -239,22 +239,60 @@ let localArticles = [...INITIAL_ARTICLES];
 let localOutward = [...INITIAL_OUTWARD];
 let localCities = [...INITIAL_CITIES];
 
+// Smart backend reachability cache (prevents 2s timeouts on screens when backend is offline)
+let isBackendLive: boolean | null = null;
+let lastReachabilityCheck = 0;
+const REACHABILITY_TTL = 30000; // 30 seconds
+const FAST_TIMEOUT_MS = 600; // Snappy 600ms timeout for live backend
+
+const shouldProbeBackend = (): boolean => {
+  if (isBackendLive === false && Date.now() - lastReachabilityCheck < REACHABILITY_TTL) {
+    return false; // Skip network call, return instant data in 0ms
+  }
+  return true;
+};
+
 export const mobileApi = {
+  // Synchronous Instant Getters (0ms UI render)
+  getArticlesSync: (): Article[] => [...localArticles],
+  getCustomersSync: (): Customer[] => [...localCustomers],
+  getOutwardSync: (): OutwardRecord[] => [...localOutward],
+  getCitiesSync: (): CityRecord[] => [...localCities],
+  getDashboardMetricsSync: () => {
+    const totalMalSent = localCustomers.reduce((acc, c) => acc + (c.totalPieces || 0), 0);
+    const totalBilled = localCustomers.reduce((acc, c) => acc + (c.totalBilled || 0), 0);
+    const totalReceived = localCustomers.reduce((acc, c) => acc + (c.totalPaid || 0), 0);
+    const totalDue = localCustomers.reduce((acc, c) => acc + (c.remainingBalance || 0), 0);
+    return {
+      totalMalSent,
+      totalBilled,
+      totalReceived,
+      totalDue,
+      activeShops: localCustomers.length,
+      totalStock: localArticles.reduce((acc, a) => acc + (a.currentStock || 0), 0),
+    };
+  },
+
   // 1. Dashboard Metrics
   getDashboardMetrics: async () => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`${API_BASE_URL}/reports/dashboard`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          return json.data;
+    if (shouldProbeBackend()) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), FAST_TIMEOUT_MS);
+        const res = await fetch(`${API_BASE_URL}/reports/dashboard`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            isBackendLive = true;
+            lastReachabilityCheck = Date.now();
+            return json.data;
+          }
         }
+      } catch {
+        isBackendLive = false;
+        lastReachabilityCheck = Date.now();
       }
-    } catch {
-      // Fallback to local store calculations
     }
 
     const totalMalSent = localCustomers.reduce((acc, c) => acc + (c.totalPieces || 0), 0);
@@ -274,18 +312,25 @@ export const mobileApi = {
 
   // 2. Customers (CRUD)
   getCustomers: async (): Promise<Customer[]> => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`${API_BASE_URL}/customers`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          return json.data;
+    if (shouldProbeBackend()) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), FAST_TIMEOUT_MS);
+        const res = await fetch(`${API_BASE_URL}/customers`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            isBackendLive = true;
+            lastReachabilityCheck = Date.now();
+            return json.data;
+          }
         }
+      } catch {
+        isBackendLive = false;
+        lastReachabilityCheck = Date.now();
       }
-    } catch {}
+    }
     return [...localCustomers];
   },
 
@@ -317,18 +362,25 @@ export const mobileApi = {
 
   // 3. Articles (Garments Stock CRUD)
   getArticles: async (): Promise<Article[]> => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`${API_BASE_URL}/articles`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          return json.data;
+    if (shouldProbeBackend()) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), FAST_TIMEOUT_MS);
+        const res = await fetch(`${API_BASE_URL}/articles`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            isBackendLive = true;
+            lastReachabilityCheck = Date.now();
+            return json.data;
+          }
         }
+      } catch {
+        isBackendLive = false;
+        lastReachabilityCheck = Date.now();
       }
-    } catch {}
+    }
     return [...localArticles];
   },
 

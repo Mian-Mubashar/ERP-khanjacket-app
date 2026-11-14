@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   Pressable,
-  ActivityIndicator,
   Modal,
   ScrollView,
 } from 'react-native';
@@ -16,9 +15,8 @@ import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 
 export const OutwardScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [dispatches, setDispatches] = useState<OutwardRecord[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [dispatches, setDispatches] = useState<OutwardRecord[]>(() => mobileApi.getOutwardSync());
+  const [customers, setCustomers] = useState<Customer[]>(() => mobileApi.getCustomersSync());
   const [search, setSearch] = useState('');
 
   // Delete modal state
@@ -26,30 +24,33 @@ export const OutwardScreen: React.FC = () => {
 
   // New Rawangi Modal State
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCustId, setSelectedCustId] = useState<number>(0);
+  const [selectedCustId, setSelectedCustId] = useState<number>(() => {
+    const custs = mobileApi.getCustomersSync();
+    return custs.length > 0 ? custs[0].id : 0;
+  });
   const [formPieces, setFormPieces] = useState('50');
   const [formAmount, setFormAmount] = useState('75000');
   const [formTransport, setFormTransport] = useState('Bilal Goods Transport');
 
   const loadData = async () => {
     try {
-      setLoading(true);
       const [d, c] = await Promise.all([
         mobileApi.getOutward(),
         mobileApi.getCustomers(),
       ]);
       setDispatches(d);
       setCustomers(c);
-      if (c.length > 0) {
+      if (c.length > 0 && selectedCustId === 0) {
         setSelectedCustId(c[0].id);
       }
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep reactive store
     }
   };
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredDispatches = dispatches.filter((d) => {
@@ -155,12 +156,7 @@ export const OutwardScreen: React.FC = () => {
       </View>
 
       {/* Dispatches List */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.brandBlue} />
-        </View>
-      ) : (
-        <FlatList
+      <FlatList
           data={filteredDispatches}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
@@ -203,9 +199,11 @@ export const OutwardScreen: React.FC = () => {
               </View>
 
               <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
-                <Text style={[styles.transportText, { color: theme.textMuted }]} numberOfLines={1}>
-                  Cargo: {item.transportName || 'Standard Goods Bilty'}
-                </Text>
+                <View style={{ flex: 1, minWidth: 0, marginRight: 8, justifyContent: 'center' }}>
+                  <Text style={[styles.transportText, { color: theme.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
+                    Cargo: {item.transportName || 'Standard Goods Bilty'}
+                  </Text>
+                </View>
 
                 <Pressable
                   onPress={() => setDeleteTarget(item)}
@@ -223,7 +221,6 @@ export const OutwardScreen: React.FC = () => {
             </View>
           }
         />
-      )}
 
       {/* Add Outward Modal */}
       <Modal
@@ -426,6 +423,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
+    overflow: 'hidden',
   },
   cardTop: {
     flexDirection: 'row',

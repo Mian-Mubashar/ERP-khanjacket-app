@@ -6,24 +6,21 @@ import {
   FlatList,
   TextInput,
   Pressable,
-  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { mobileApi, CityRecord } from '../services/api';
 
 export const BranchesScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [cities, setCities] = useState<CityRecord[]>([]);
+  const [cities, setCities] = useState<CityRecord[]>(() => mobileApi.getCitiesSync());
   const [search, setSearch] = useState('');
 
   const loadCities = async () => {
     try {
-      setLoading(true);
       const data = await mobileApi.getCities();
       setCities(data);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep reactive store
     }
   };
 
@@ -85,12 +82,7 @@ export const BranchesScreen: React.FC = () => {
       </View>
 
       {/* Cities List */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.brandBlue} />
-        </View>
-      ) : (
-        <FlatList
+      <FlatList
           data={filteredCities}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
@@ -157,7 +149,6 @@ export const BranchesScreen: React.FC = () => {
             </View>
           }
         />
-      )}
     </View>
   );
 };

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  ActivityIndicator,
 } from 'react-native';
 import { colors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
@@ -20,21 +19,19 @@ interface DashboardScreenProps {
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState({
-    totalMalSent: 0,
-    totalBilled: 0,
-    totalReceived: 0,
-    totalDue: 0,
-    activeShops: 0,
-    totalStock: 0,
-  });
-  const [recentOutward, setRecentOutward] = useState<OutwardRecord[]>([]);
-  const [dueCustomers, setDueCustomers] = useState<Customer[]>([]);
+  const [metrics, setMetrics] = useState(() => mobileApi.getDashboardMetricsSync());
+  const [recentOutward, setRecentOutward] = useState<OutwardRecord[]>(() =>
+    mobileApi.getOutwardSync().slice(0, 3)
+  );
+  const [dueCustomers, setDueCustomers] = useState<Customer[]>(() =>
+    mobileApi
+      .getCustomersSync()
+      .filter((c) => c.remainingBalance > 0)
+      .slice(0, 3)
+  );
 
   const loadData = async () => {
     try {
-      setLoading(true);
       const [m, custs, outw] = await Promise.all([
         mobileApi.getDashboardMetrics(),
         mobileApi.getCustomers(),
@@ -43,25 +40,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigate }) 
       setMetrics(m);
       setRecentOutward(outw.slice(0, 3));
       setDueCustomers(custs.filter((c) => c.remainingBalance > 0).slice(0, 3));
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep existing reactive state
     }
   };
 
   useEffect(() => {
     loadData();
   }, []);
-
-  if (loading) {
-    return (
-      <View style={[styles.center, { backgroundColor: theme.background }]}>
-        <ActivityIndicator size="large" color={theme.brandBlue} />
-        <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
-          Loading Dashboard...
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <ScrollView

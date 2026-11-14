@@ -6,7 +6,6 @@ import {
   FlatList,
   TextInput,
   Pressable,
-  ActivityIndicator,
   Modal,
   ScrollView,
 } from 'react-native';
@@ -16,8 +15,7 @@ import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 
 export const CustomersScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>(() => mobileApi.getCustomersSync());
   const [search, setSearch] = useState('');
   const [filterTab, setFilterTab] = useState<'ALL' | 'DUE' | 'SETTLED'>('ALL');
 
@@ -36,11 +34,10 @@ export const CustomersScreen: React.FC = () => {
 
   const loadCustomers = async () => {
     try {
-      setLoading(true);
       const data = await mobileApi.getCustomers();
       setCustomers(data);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep reactive store
     }
   };
 
@@ -263,12 +260,7 @@ export const CustomersScreen: React.FC = () => {
       </View>
 
       {/* Customer List */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.brandBlue} />
-        </View>
-      ) : (
-        <FlatList
+      <FlatList
           data={filteredCustomers}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
@@ -394,7 +386,6 @@ export const CustomersScreen: React.FC = () => {
             </View>
           }
         />
-      )}
 
       {/* Edit / Add Modal */}
       <Modal
@@ -642,6 +633,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
+    overflow: 'hidden',
   },
   cardTopRow: {
     flexDirection: 'row',

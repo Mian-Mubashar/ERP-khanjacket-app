@@ -82,9 +82,11 @@ class AuthenticationManager {
     }
 
     try {
-      // Create a timeout controller for responsive UI
+      // Snappy 700ms timeout for live backend connection
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 700);
 
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',

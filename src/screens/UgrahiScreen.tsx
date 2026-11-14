@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
-  ActivityIndicator,
   Modal,
   TextInput,
   ScrollView,
@@ -15,9 +14,8 @@ import { mobileApi, Customer, CityRecord } from '../services/api';
 
 export const UgrahiScreen: React.FC = () => {
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [cities, setCities] = useState<CityRecord[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>(() => mobileApi.getCustomersSync());
+  const [cities, setCities] = useState<CityRecord[]>(() => mobileApi.getCitiesSync());
   const [selectedRoute, setSelectedRoute] = useState<string>('ALL');
 
   // Wasooli Modal
@@ -28,15 +26,14 @@ export const UgrahiScreen: React.FC = () => {
 
   const loadData = async () => {
     try {
-      setLoading(true);
       const [custs, c] = await Promise.all([
         mobileApi.getCustomers(),
         mobileApi.getCities(),
       ]);
       setCustomers(custs);
       setCities(c);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Keep reactive store
     }
   };
 
@@ -132,73 +129,67 @@ export const UgrahiScreen: React.FC = () => {
       </View>
 
       {/* Wasooli Sheet List */}
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.brandBlue} />
-        </View>
-      ) : (
-        <FlatList
-          data={ugrahiCustomers}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
-          renderItem={({ item, index }) => {
-            const hasDue = item.remainingBalance > 0;
-            return (
-              <View
-                style={[
-                  styles.sheetCard,
-                  {
-                    backgroundColor: theme.surface,
-                    borderColor: theme.border,
-                  },
-                ]}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={[styles.indexCircle, { backgroundColor: theme.brandBlueLight }]}>
-                    <Text style={[styles.indexText, { color: theme.brandBlue }]}>{index + 1}</Text>
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 10 }}>
-                    <Text style={[styles.shopName, { color: theme.textPrimary }]}>{item.shopName}</Text>
-                    <Text style={[styles.shopSub, { color: theme.textMuted }]}>
-                      {item.shopkeeperName} • 📍 {item.city} ({item.area || 'All Areas'})
-                    </Text>
-                  </View>
-
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text
-                      style={[
-                        styles.balanceValue,
-                        { color: hasDue ? theme.danger : theme.success },
-                      ]}
-                    >
-                      {hasDue ? `Rs. ${Number(item.remainingBalance || 0).toLocaleString()}` : 'Settled'}
-                    </Text>
-                    <Text style={[styles.balanceLabel, { color: theme.textMuted }]}>Khata Balance</Text>
-                  </View>
+      <FlatList
+        data={ugrahiCustomers}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
+        renderItem={({ item, index }) => {
+          const hasDue = item.remainingBalance > 0;
+          return (
+            <View
+              style={[
+                styles.sheetCard,
+                {
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
+                },
+              ]}
+            >
+              <View style={styles.cardHeader}>
+                <View style={[styles.indexCircle, { backgroundColor: theme.brandBlueLight }]}>
+                  <Text style={[styles.indexText, { color: theme.brandBlue }]}>{index + 1}</Text>
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={[styles.shopName, { color: theme.textPrimary }]}>{item.shopName}</Text>
+                  <Text style={[styles.shopSub, { color: theme.textMuted }]}>
+                    {item.shopkeeperName} • 📍 {item.city} ({item.area || 'All Areas'})
+                  </Text>
                 </View>
 
-                {/* Card Actions */}
-                <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
-                  <Text style={[styles.phoneText, { color: theme.textSecondary }]}>📞 {item.phone || 'No Contact'}</Text>
-
-                  <Pressable
-                    onPress={() => handleOpenWasooli(item)}
-                    style={[styles.wasooliBtn, { backgroundColor: theme.success }]}
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text
+                    style={[
+                      styles.balanceValue,
+                      { color: hasDue ? theme.danger : theme.success },
+                    ]}
                   >
-                    <Text style={styles.wasooliBtnText}>💰 Wasooli Receipt</Text>
-                  </Pressable>
+                    {hasDue ? `Rs. ${Number(item.remainingBalance || 0).toLocaleString()}` : 'Settled'}
+                  </Text>
+                  <Text style={[styles.balanceLabel, { color: theme.textMuted }]}>Khata Balance</Text>
                 </View>
               </View>
-            );
-          }}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={{ fontSize: 32 }}>💰</Text>
-              <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>No shopkeepers found on this route</Text>
+
+              {/* Card Actions */}
+              <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
+                <Text style={[styles.phoneText, { color: theme.textSecondary }]}>📞 {item.phone || 'No Contact'}</Text>
+
+                <Pressable
+                  onPress={() => handleOpenWasooli(item)}
+                  style={[styles.wasooliBtn, { backgroundColor: theme.success }]}
+                >
+                  <Text style={styles.wasooliBtnText}>💰 Wasooli Receipt</Text>
+                </Pressable>
+              </View>
             </View>
-          }
-        />
-      )}
+          );
+        }}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={{ fontSize: 32 }}>💰</Text>
+            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>No shopkeepers found on this route</Text>
+          </View>
+        }
+      />
 
       {/* Wasooli Record Modal */}
       <Modal
