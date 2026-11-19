@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { mobileApi, Customer, CityRecord } from '../services/api';
+import { formatCustomerDisplayName } from '../utils/formatters';
 
 export const UgrahiScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -150,9 +151,11 @@ export const UgrahiScreen: React.FC = () => {
                   <Text style={[styles.indexText, { color: theme.brandBlue }]}>{index + 1}</Text>
                 </View>
                 <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={[styles.shopName, { color: theme.textPrimary }]}>{item.shopName}</Text>
+                  <Text style={[styles.shopName, { color: theme.textPrimary }]}>
+                    {formatCustomerDisplayName(item.shopName, item.shopkeeperName)}
+                  </Text>
                   <Text style={[styles.shopSub, { color: theme.textMuted }]}>
-                    {item.shopkeeperName} • 📍 {item.city} ({item.area || 'All Areas'})
+                    {item.shopkeeperName && item.shopkeeperName !== item.shopName ? `${item.shopkeeperName} • ` : ''}📍 {item.city} ({item.area || 'All Areas'})
                   </Text>
                 </View>
 

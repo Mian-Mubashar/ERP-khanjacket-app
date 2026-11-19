@@ -141,12 +141,12 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onNavigate }) 
       cities.forEach((city) => {
         if (
           city.name.toLowerCase().includes(q) ||
-          city.province.toLowerCase().includes(q)
+          (city.province && city.province.toLowerCase().includes(q))
         ) {
           results.push({
             id: `city-${city.id}`,
             type: 'city',
-            title: `${city.name} (${city.province})`,
+            title: city.province ? `${city.name} (${city.province})` : city.name,
             subtitle: `${city.shopsCount} Shops registered in this city/branch`,
             extraBadge: 'Branch',
             targetScreen: 'Branches',

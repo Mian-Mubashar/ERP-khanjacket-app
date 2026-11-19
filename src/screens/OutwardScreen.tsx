@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../theme/ThemeContext';
 import { mobileApi, OutwardRecord, Customer } from '../services/api';
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
+import { formatCustomerDisplayName } from '../utils/formatters';
 
 export const OutwardScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -186,7 +187,7 @@ export const OutwardScreen: React.FC = () => {
                       <Text style={[styles.statusText, { color: theme.success }]}>{item.status}</Text>
                     </View>
                   </View>
-                  <Text style={[styles.customerName, { color: theme.textPrimary }]}>{item.customerName}</Text>
+                  <Text style={[styles.customerName, { color: theme.textPrimary }]}>{formatCustomerDisplayName(item.customerName)}</Text>
                   <Text style={[styles.cityText, { color: theme.textSecondary }]}>
                     📍 {item.city} • 📅 {item.date}
                   </Text>

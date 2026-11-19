@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../theme/ThemeContext';
 import { mobileApi, Customer } from '../services/api';
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
+import { formatCustomerDisplayName } from '../utils/formatters';
 
 export const CustomersScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -280,10 +281,10 @@ export const CustomersScreen: React.FC = () => {
                 <View style={styles.cardTopRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.shopName, { color: theme.textPrimary }]} numberOfLines={1}>
-                      {item.shopName}
+                      {formatCustomerDisplayName(item.shopName, item.shopkeeperName)}
                     </Text>
                     <Text style={[styles.shopOwner, { color: theme.textSecondary }]}>
-                      {item.shopkeeperName} • {item.phone || 'No phone'}
+                      {item.shopkeeperName && item.shopkeeperName !== item.shopName ? `${item.shopkeeperName} • ` : ''}{item.phone || 'No phone'}
                     </Text>
                   </View>
 
